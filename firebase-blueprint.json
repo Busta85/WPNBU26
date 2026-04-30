@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "Registration": {
+      "title": "Registration",
+      "description": "Athlete registration for the competition.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["fullName", "email", "category", "createdAt"]
+    },
+    "GalleryItem": {
+      "title": "GalleryItem",
+      "description": "Gallery image item.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "year": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["title", "imageUrl", "year", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/registrations/{registrationId}": {
+      "schema": { "$ref": "#/entities/Registration" },
+      "description": "Registrations collection"
+    },
+    "/gallery/{galleryItemId}": {
+      "schema": { "$ref": "#/entities/GalleryItem" },
+      "description": "Gallery items collection"
+    }
+  }
+}

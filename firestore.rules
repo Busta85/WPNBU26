@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() {
+      return request.resource.data;
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidRegistration(data) {
+      return data.keys().hasAll(['fullName', 'email', 'category', 'createdAt']) &&
+             data.keys().size() >= 4 &&
+             data.keys().size() <= 6 &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 200 &&
+             data.email is string && data.email.size() <= 200 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.createdAt == request.time;
+    }
+
+    match /registrations/{registrationId} {
+      // Anyone can register
+      allow create: if isValidId(registrationId) && isValidRegistration(incoming());
+      // No reading registrations for public
+      allow read, update, delete: if false;
+    }
+
+    function isValidGalleryItem(data) {
+      return data.keys().hasAll(['title', 'imageUrl', 'year', 'createdAt']) &&
+             data.keys().size() == 4 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.imageUrl is string && data.imageUrl.size() <= 1000 &&
+             data.year is string && data.year.size() <= 10 &&
+             data.createdAt == request.time;
+    }
+
+    match /gallery/{galleryItemId} {
+      // Anyone can read gallery and create new AI generated images
+      allow read: if true;
+      allow create: if isValidId(galleryItemId) && isValidGalleryItem(incoming());
+      allow update, delete: if false;
+    }
+  }
+}
